@@ -49,11 +49,33 @@ source /data_ilc/flc/shi/miniconda3/etc/profile.d/conda.sh
 conda activate root_torch
 ```
 
-After activation, `python` should point to:
+This environment currently provides ROOT:
 
 ```text
+ROOT 6.36.04
+```
+
+Check the active ROOT and Python before running the conversion macros or
+notebooks:
+
+```bash
+which root
+root-config --version
+which python
+python -c "import sys, ROOT; print(sys.executable); print(ROOT.gROOT.GetVersion())"
+```
+
+Expected paths and version:
+
+```text
+/data_ilc/flc/shi/miniconda3/envs/root_torch/bin/root
+6.36.04
 /data_ilc/flc/shi/miniconda3/envs/root_torch/bin/python
 ```
+
+Avoid mixing this conda Python with a different system ROOT installation. The
+decode macros and notebooks assume the ROOT and PyROOT libraries from the same
+`root_torch` environment.
 
 The digitization notebooks and pybind11 build may also use the TB2026/key4hep
 environment documented in `Digitization/README`.
