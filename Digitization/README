@@ -1,0 +1,111 @@
+Digitization for TB2026-06
+==========================
+
+Input data:
+
+  /home/llr/ilc/shi/data/SiWECAL-Prototype/TB2026-06/CONF6/
+
+Generation code:
+
+  /home/llr/ilc/shi/code/Energy-Reco/Generation/generation/run_scripts/TB2026-06
+
+MuonCalib.ipynb is used to get the MIP value.  For CONF6 with 0.5 mm Si, the
+current value is:
+
+  0.1472 MeV/MIP
+
+
+Cell shaping
+------------
+
+The common C++ implementation is in:
+
+  include/CellShaping.hh
+
+It is header-only and provides:
+
+  siwecal::shapeCellSteps(...)
+
+`shapeCellSteps` returns the digitized result with the original
+`CellShapingResult` output fields.
+
+The fast-version point finder is separated into:
+
+  include/Shaping_FastVersion.hh
+
+It provides:
+
+  siwecal::shapingFastVersion(...)
+
+Here `FastVersion` means the faster calculation version.  It is not the
+electronics fast shaper channel.  `shapingFastVersion` still returns both fast
+and slow shaping key points: fast peak, slow peak, trigger point, and slow
+sample point.  It does not build or store the full shaping curve.
+
+Current default configuration:
+
+  mipValueGeV   = 0.0001472
+  mipThreshold  = 0.5
+  delayNs       = 160.0
+  tauFastNs     = 30.0
+  tauSlowNs     = 180.0
+  orderFast     = 2
+  orderSlow     = 2
+  fastWindowNs  = 200.0
+  slowWindowNs  = 500.0
+  fastNoiseMIP  = 1/30
+  slowNoiseMIP  = 1/12
+  peakSearchBins    = 64
+  refineIterations  = 48
+  triggerSearchBins = 64
+
+Noise is added in MIP units to the reported fast peak, slow peak, and slow
+sample amplitudes.  Peak times are found with a coarse bracket plus golden
+section refinement.  The trigger time is found by bracketing the first fast
+threshold crossing and refining it with bisection.  The slow sample point is
+computed directly from the slow shaping function at `trigger_time + delayNs`,
+then one additional slow-noise sample is added.
+
+Before any peak or trigger search, both `shapeCellSteps` and
+`shapingFastVersion` check the raw hit energy:
+
+  sum(stepEnergyGeV) / mipValueGeV < mipThreshold
+
+If this is true, the function returns the default zero/invalid output directly
+and skips the shaping calculation.
+
+
+Build
+-----
+
+Build the C++ test executable:
+
+  cmake -S . -B build
+  cmake --build build
+
+Run it:
+
+  ./build/test_cell_shaping
+
+
+Python module for notebooks
+---------------------------
+
+`CMakeLists.txt` can also build a pybind11 module:
+
+  cell_shaping_cpp
+
+Use the TB2026/key4hep notebook environment so CMake uses the same Python as the
+`root_torch_tb2026` kernel:
+
+  source /home/llr/ilc/shi/code/SiWECAL-Prototype/generation/run_scripts/TB2026-06/env.sh
+  PYEXE=$(python -c "import sys; print(sys.executable)")
+  cmake -S . -B build_py313 -DPython3_EXECUTABLE="$PYEXE"
+  cmake --build build_py313
+
+The module is written to:
+
+  build_py313/python/cell_shaping_cpp*.so
+
+The Python module exposes `shape_cell_steps(...)` and
+`shaping_fast_version(...)`.

@@ -1,0 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# CMake and compiled outputs
+build/
+build_*/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.o
+*.so
+*.a
+*.d
+*.bin
+a.out
+test_cell_shaping
+
+# ROOT/test-beam data products
+*.root
+*.raw
+*.dat
+*.dat_*
+*.bin_*
+
+# Generated analysis products
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.svg
+figures*/
+plots*/
+output*/
+outputs*/
+
+# Local/editor files
+.DS_Store
+*~
+*.swp
+.vscode/
+.idea/
+
+# Codex/local agent metadata
+.agents/
+.codex/
