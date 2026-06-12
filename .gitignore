@@ -19,6 +19,7 @@ Makefile
 *.a
 *.d
 *.bin
+!tutorial/asu_source/data/**/*.bin
 a.out
 test_cell_shaping
 

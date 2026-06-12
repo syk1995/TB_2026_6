@@ -18,6 +18,7 @@ plots are intentionally kept outside Git.
   threshold-scan data.
 - `asu_source/`: decoded-frame source-ASU conversion and hitmap plotting
   helpers.
+- `tutorial/`: small self-contained examples with sample input data and scripts.
 
 ## Data Locations
 
