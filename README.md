@@ -80,36 +80,44 @@ decode macros and notebooks assume the ROOT and PyROOT libraries from the same
 The digitization notebooks and pybind11 build may also use the TB2026/key4hep
 environment documented in `Digitization/README`.
 
-## Decode TDC Runs
+## Decode Data
 
-Convert all commissioning TDC `ilc_run_*` directories:
+The decode tools convert several TB2026-06 input formats into ROOT files with a
+`siwecaldecoded` tree. See `Decode/README.md` for full options and format
+details.
+
+ASCII decoded `.dat/.dat_000N` files are handled by the legacy decoded-data
+backend:
 
 ```bash
 cd Decode
 bash convert_tdc_runs.sh
 ```
 
-Convert one run:
+Convert one run directory when using the TDC batch wrapper:
 
 ```bash
 bash convert_tdc_runs.sh --run 15
 ```
 
-The converted ROOT files are written next to the input `.dat` files.
-
-## Decode Source-ASU Runs
-
-Batch-decode source-ASU input directories:
+Decoded-frame binary `.bin/.bin_000N` files, whose header says
+`DATA STRUCTURE INFO : DECODED FRAMES`, are handled by the decoded-frame binary
+converter. The source-ASU batch helper auto-detects these files and writes ROOT
+outputs back into each input run directory:
 
 ```bash
 cd asu_source
 bash decode_source_asu_all.sh
 ```
 
-The helper detects decoded-frame `.bin/.bin_000N` runs and ASCII `.dat/.dat_000N`
-runs, then writes converted ROOT files back into each input run directory.
+Raw binary `.raw` or `*raw.bin*` files use the raw-frame backend. The TB2026-06
+wrapper currently uses the non-EUDAQ raw reader for SL software raw frames.
+Do not use the raw decoder for decoded-frame `.bin` files.
 
-Plot all decoded source-ASU hitmaps:
+Converted ROOT files are written next to the input data unless a helper script
+documents a different output path.
+
+Quick hitmap checks are available after conversion:
 
 ```bash
 python plot_decoded_bin_root_hitmap.py
@@ -153,6 +161,19 @@ The current default MIP calibration for CONF6 with 0.5 mm silicon is:
 
 See `Digitization/README` for the full shaping configuration and Python module
 build instructions.
+
+## Useful Links
+
+- TB2025 legacy analysis code:
+  <https://github.com/SiWECAL-TestBeam/SiWECAL-TB-analysis>
+- TB2025 monitoring code:
+  <https://github.com/SiWECAL-TestBeam/SiWECAL-TB-monitoring>
+- TB2025 local analysis scripts used as references in this workspace:
+  <https://github.com/syk1995/TB>
+- AHCAL raw/BIF utility code used by the older TB workflow:
+  <https://github.com/jkvas/AHCAL-RAWutils>
+- SKIROC2 datasheet:
+  <https://www.weeroc.com/~documents/products/skiroc-2a/skiroc-2-datasheet/?layout=file>
 
 ## Notes
 
