@@ -13,6 +13,7 @@ OUTPUT_PDF="${OUTPUT_DIR}/${RUN_NAME}_hitmap.pdf"
 
 ROOT_ENV="${ROOT_ENV:-/data_ilc/flc/shi/miniconda3/etc/profile.d/conda.sh}"
 CONDA_ENV="${CONDA_ENV:-root_torch}"
+PYTHON_BIN="${PYTHON_BIN:-python3}"
 
 if [[ ! -s "${ROOT_FILE}" ]]; then
   echo "Missing decoded ROOT file: ${ROOT_FILE}" >&2
@@ -27,7 +28,13 @@ if [[ -f "${ROOT_ENV}" ]]; then
   set -u
 fi
 
-python "${REPO_ROOT}/asu_source/plot_decoded_bin_root_hitmap.py" \
+if ! command -v "${PYTHON_BIN}" >/dev/null 2>&1; then
+  echo "Missing Python executable: ${PYTHON_BIN}" >&2
+  echo "Set PYTHON_BIN=/path/to/python or make sure python3 is on PATH." >&2
+  exit 2
+fi
+
+"${PYTHON_BIN}" "${REPO_ROOT}/asu_source/plot_decoded_bin_root_hitmap.py" \
   --run-dir "${RUN_DIR}" \
   --root-file "${ROOT_FILE}" \
   --output-pdf "${OUTPUT_PDF}" \

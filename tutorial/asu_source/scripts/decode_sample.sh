@@ -18,18 +18,18 @@ if [[ ! -f "${RUN_DIR}/${RUN_NAME}.bin" ]]; then
   exit 2
 fi
 
-if [[ ! -f "${ROOT_ENV}" ]]; then
-  echo "Missing ROOT/conda setup script: ${ROOT_ENV}" >&2
-  echo "Set ROOT_ENV=/path/to/conda.sh or edit this tutorial script." >&2
-  exit 2
-fi
-
 mkdir -p "${OUTPUT_DIR}"
 
-set +u
-source "${ROOT_ENV}"
-conda activate "${CONDA_ENV}"
-set -u
+if [[ -f "${ROOT_ENV}" ]]; then
+  set +u
+  source "${ROOT_ENV}"
+  conda activate "${CONDA_ENV}"
+  set -u
+elif ! command -v root >/dev/null 2>&1; then
+  echo "Missing ROOT executable and conda setup script: ${ROOT_ENV}" >&2
+  echo "Set ROOT_ENV=/path/to/conda.sh or make sure 'root' is on PATH." >&2
+  exit 2
+fi
 
 root -l -b -q \
   -e ".L ${REPO_ROOT}/Decode/macros/SLBdecodedBin2ROOT.cc" \
