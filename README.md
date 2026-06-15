@@ -43,6 +43,8 @@ different machine.
 
 ## Environment
 
+### LLR server
+
 The decode and plotting tools use the existing `root_torch` conda environment:
 
 ```bash
@@ -81,7 +83,7 @@ decode macros and notebooks assume the ROOT and PyROOT libraries from the same
 The digitization notebooks and pybind11 build may also use the TB2026/key4hep
 environment documented in `Digitization/README`.
 
-## lxplus Setup
+### lxplus
 
 On `lxplus`, the repository was tested on June 15, 2026 with the CERN-provided
 system ROOT:
@@ -101,8 +103,8 @@ Example output on the tested machine:
 ```
 
 For the small `tutorial/asu_source` example, the current scripts first try the
-`root_torch` conda setup above. If that setup is unavailable, they fall back to
-the system `root` on `PATH` and use `python3` for plotting.
+LLR `root_torch` conda setup above. If that setup is unavailable, they fall
+back to the system `root` on `PATH` and use `python3` for plotting.
 
 If the plotting step complains about a missing `uproot` module on lxplus,
 install it in your user area:
