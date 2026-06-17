@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
 DATA_ROOT="${1:-/home/llr/ilc/shi/data/SiWECAL-Prototype/TB2026-06/Comission/source_asu}"
-DECODE_MACROS="/home/llr/ilc/shi/code/TB_2026_6/Decode/macros"
-ROOT_ENV="/data_ilc/flc/shi/miniconda3/etc/profile.d/conda.sh"
-CONDA_ENV="root_torch"
+DECODE_MACROS="${REPO_ROOT}/Decode/macros"
+KEY4HEP_SETUP="${KEY4HEP_SETUP:-/cvmfs/sw.hsf.org/key4hep/setup.sh}"
+ROOT_ENV="${ROOT_ENV:-}"
+CONDA_ENV="${CONDA_ENV:-root_torch}"
 FORCE="${FORCE:-0}"
 
 if [[ ! -d "${DATA_ROOT}" ]]; then
@@ -12,8 +16,22 @@ if [[ ! -d "${DATA_ROOT}" ]]; then
   exit 2
 fi
 
-source "${ROOT_ENV}"
-conda activate "${CONDA_ENV}"
+if [[ -n "${KEY4HEP_STACK:-}" ]]; then
+  :
+elif [[ -f "${KEY4HEP_SETUP}" ]]; then
+  set +u
+  source "${KEY4HEP_SETUP}"
+  set -u
+elif [[ -n "${ROOT_ENV}" && -f "${ROOT_ENV}" ]]; then
+  set +u
+  source "${ROOT_ENV}"
+  conda activate "${CONDA_ENV}"
+  set -u
+elif ! command -v root >/dev/null 2>&1; then
+  echo "Missing ROOT executable and environment setup scripts." >&2
+  echo "Set KEY4HEP_SETUP=/path/to/setup.sh, ROOT_ENV=/path/to/conda.sh, or make sure 'root' is on PATH." >&2
+  exit 2
+fi
 
 decode_decoded_bin_dir() {
   local run_dir="$1"

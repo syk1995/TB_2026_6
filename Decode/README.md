@@ -19,30 +19,33 @@ small set of wrappers for normal use.
 
 ## Environment
 
-Use the existing `root_torch` conda environment:
+Use the `key4hep` environment by default:
+
+```bash
+source /cvmfs/sw.hsf.org/key4hep/setup.sh
+```
+
+After activation, check the matched ROOT/Python stack:
+
+```bash
+which root
+root-config --version
+which python3
+python3 -c "import sys, numpy, matplotlib, uproot; print(sys.executable)"
+```
+
+Example output on the tested lxplus machine:
+
+```text
+/cvmfs/sft.cern.ch/lcg/views/.../bin/python3
+```
+
+The batch wrappers source `/cvmfs/sw.hsf.org/key4hep/setup.sh` automatically if
+it exists. On machines without `key4hep`, keep using the older `root_torch`
+setup:
 
 ```bash
 source /data_ilc/flc/shi/miniconda3/etc/profile.d/conda.sh
-conda activate root_torch
-```
-
-After activation, `python` should be the conda one, not `/usr/bin/python`:
-
-```bash
-which python
-python -c "import sys, numpy, matplotlib, uproot; print(sys.executable)"
-```
-
-Expected Python path:
-
-```text
-/data_ilc/flc/shi/miniconda3/envs/root_torch/bin/python
-```
-
-If an old terminal still finds `/usr/bin/python`, open a new shell or run:
-
-```bash
-source ~/.bashrc
 conda activate root_torch
 ```
 
@@ -162,7 +165,8 @@ cd /home/llr/ilc/shi/code/TB_2026_6/Decode
 jupyter lab Hitmap.ipynb
 ```
 
-Use a Python kernel from `root_torch`. In the first notebook code cell, set:
+Use a Python kernel from `key4hep` when available, or `root_torch` on the older
+LLR setup. In the first notebook code cell, set:
 
 - `RUN_NUMBER`: normal case, for example `15`.
 - `ROOT_FILE_PATH`: optional direct path to a converted ROOT file or run

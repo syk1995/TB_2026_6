@@ -19,16 +19,17 @@ bash scripts/decode_sample.sh
 bash scripts/plot_sample_hitmap.sh
 ```
 
-The scripts use the existing `root_torch` conda environment by default:
+The scripts use `key4hep` by default:
 
 ```bash
-/data_ilc/flc/shi/miniconda3/etc/profile.d/conda.sh
-root_torch
+source /cvmfs/sw.hsf.org/key4hep/setup.sh
 ```
 
-Override them if needed:
+The wrapper scripts source `/cvmfs/sw.hsf.org/key4hep/setup.sh` automatically if
+it exists. Override them if needed:
 
 ```bash
+KEY4HEP_SETUP=/path/to/setup.sh bash run_all.sh
 ROOT_ENV=/path/to/conda.sh CONDA_ENV=my_env bash run_all.sh
 ```
 

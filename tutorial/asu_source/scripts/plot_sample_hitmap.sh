@@ -11,7 +11,8 @@ OUTPUT_DIR="${TUTORIAL_DIR}/output"
 ROOT_FILE="${OUTPUT_DIR}/converted_${RUN_NAME}_decoded_bin.root"
 OUTPUT_PDF="${OUTPUT_DIR}/${RUN_NAME}_hitmap.pdf"
 
-ROOT_ENV="${ROOT_ENV:-/data_ilc/flc/shi/miniconda3/etc/profile.d/conda.sh}"
+KEY4HEP_SETUP="${KEY4HEP_SETUP:-/cvmfs/sw.hsf.org/key4hep/setup.sh}"
+ROOT_ENV="${ROOT_ENV:-}"
 CONDA_ENV="${CONDA_ENV:-root_torch}"
 PYTHON_BIN="${PYTHON_BIN:-python3}"
 
@@ -21,7 +22,13 @@ if [[ ! -s "${ROOT_FILE}" ]]; then
   exit 2
 fi
 
-if [[ -f "${ROOT_ENV}" ]]; then
+if [[ -n "${KEY4HEP_STACK:-}" ]]; then
+  :
+elif [[ -f "${KEY4HEP_SETUP}" ]]; then
+  set +u
+  source "${KEY4HEP_SETUP}"
+  set -u
+elif [[ -n "${ROOT_ENV}" && -f "${ROOT_ENV}" ]]; then
   set +u
   source "${ROOT_ENV}"
   conda activate "${CONDA_ENV}"

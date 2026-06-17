@@ -4,7 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MACRO_DIR="${SCRIPT_DIR}/macros"
 DATA_ROOT="${DATA_ROOT:-${HOME}/data/SiWECAL-Prototype/TB2026-06/Comission/tdc}"
-CONDA_SH="${CONDA_SH:-/data_ilc/flc/shi/miniconda3/etc/profile.d/conda.sh}"
+KEY4HEP_SETUP="${KEY4HEP_SETUP:-/cvmfs/sw.hsf.org/key4hep/setup.sh}"
+CONDA_SH="${CONDA_SH:-}"
 ROOT_TORCH_ENV="${ROOT_TORCH_ENV:-/data_ilc/flc/shi/miniconda3/envs/root_torch}"
 MODE="ascii"
 FORCE=0
@@ -30,9 +31,11 @@ Options:
   -h, --help         Show this help.
 
 Environment:
-  Uses the root_torch conda environment by default:
-    ${ROOT_TORCH_ENV}
-  Override with ROOT_TORCH_ENV=/path/to/env if needed.
+  Uses key4hep by default:
+    ${KEY4HEP_SETUP}
+  Override with KEY4HEP_SETUP=/path/to/setup.sh.
+  Legacy fallback:
+    CONDA_SH=/path/to/conda.sh ROOT_TORCH_ENV=/path/to/env
 
 Examples:
   $(basename "$0")
@@ -87,7 +90,15 @@ if [[ ! -d "${DATA_ROOT}" ]]; then
 fi
 
 if [[ "${DRY_RUN}" -eq 0 ]]; then
-  if [[ -f "${CONDA_SH}" ]]; then
+  if [[ -n "${KEY4HEP_STACK:-}" ]]; then
+    :
+  elif [[ -f "${KEY4HEP_SETUP}" ]]; then
+    # key4hep provides a matched ROOT/Python stack on lxplus.
+    # shellcheck disable=SC1090
+    set +u
+    source "${KEY4HEP_SETUP}"
+    set -u
+  elif [[ -n "${CONDA_SH}" && -f "${CONDA_SH}" ]]; then
     # root_torch needs conda activation so ROOT/Cling sees its compiler paths.
     # shellcheck disable=SC1090
     set +u
@@ -99,7 +110,7 @@ if [[ "${DRY_RUN}" -eq 0 ]]; then
   fi
 
   if ! command -v root >/dev/null 2>&1; then
-    echo "ROOT is not available. Check ROOT_TORCH_ENV or CONDA_SH." >&2
+    echo "ROOT is not available. Check KEY4HEP_SETUP, ROOT_TORCH_ENV, or CONDA_SH." >&2
     exit 1
   fi
 fi

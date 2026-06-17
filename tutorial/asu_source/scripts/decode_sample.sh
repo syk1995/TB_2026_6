@@ -10,7 +10,8 @@ RUN_DIR="${TUTORIAL_DIR}/data/${RUN_NAME}"
 OUTPUT_DIR="${TUTORIAL_DIR}/output"
 OUTPUT_ROOT="${OUTPUT_DIR}/converted_${RUN_NAME}_decoded_bin.root"
 
-ROOT_ENV="${ROOT_ENV:-/data_ilc/flc/shi/miniconda3/etc/profile.d/conda.sh}"
+KEY4HEP_SETUP="${KEY4HEP_SETUP:-/cvmfs/sw.hsf.org/key4hep/setup.sh}"
+ROOT_ENV="${ROOT_ENV:-}"
 CONDA_ENV="${CONDA_ENV:-root_torch}"
 
 if [[ ! -f "${RUN_DIR}/${RUN_NAME}.bin" ]]; then
@@ -20,14 +21,20 @@ fi
 
 mkdir -p "${OUTPUT_DIR}"
 
-if [[ -f "${ROOT_ENV}" ]]; then
+if [[ -n "${KEY4HEP_STACK:-}" ]]; then
+  :
+elif [[ -f "${KEY4HEP_SETUP}" ]]; then
+  set +u
+  source "${KEY4HEP_SETUP}"
+  set -u
+elif [[ -n "${ROOT_ENV}" && -f "${ROOT_ENV}" ]]; then
   set +u
   source "${ROOT_ENV}"
   conda activate "${CONDA_ENV}"
   set -u
 elif ! command -v root >/dev/null 2>&1; then
-  echo "Missing ROOT executable and conda setup script: ${ROOT_ENV}" >&2
-  echo "Set ROOT_ENV=/path/to/conda.sh or make sure 'root' is on PATH." >&2
+  echo "Missing ROOT executable and environment setup scripts." >&2
+  echo "Set KEY4HEP_SETUP=/path/to/setup.sh, ROOT_ENV=/path/to/conda.sh, or make sure 'root' is on PATH." >&2
   exit 2
 fi
 
