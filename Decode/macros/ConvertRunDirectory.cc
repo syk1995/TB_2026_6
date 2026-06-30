@@ -6,6 +6,7 @@
 #include "TSystem.h"
 #include "TSystemDirectory.h"
 #include "TSystemFile.h"
+#include "TFileMerger.h"
 #include "TList.h"
 #include "TString.h"
 
@@ -64,6 +65,45 @@ TString OutputName(TString output_dir, TString input_file) {
   return JoinPath(output_dir, "converted_" + base + ".root");
 }
 
+TString TemporaryOutputDir(TString output_dir, TString run_prefix) {
+  gSystem->mkdir(output_dir, true);
+  return JoinPath(output_dir, ".tmp_convert_" + run_prefix);
+}
+
+TString MergedOutputName(TString output_dir, TString run_prefix) {
+  gSystem->mkdir(output_dir, true);
+  return JoinPath(output_dir, "converted_" + run_prefix + ".root");
+}
+
+bool MergeRootFiles(const std::vector<TString> &input_files,
+                    TString output_file,
+                    bool overwrite) {
+  if (input_files.empty()) {
+    std::cerr << "No ROOT files to merge into " << output_file << std::endl;
+    return false;
+  }
+
+  TFileMerger merger;
+  if (!merger.OutputFile(output_file, overwrite ? "RECREATE" : "CREATE")) {
+    std::cerr << "Cannot create merged ROOT file: " << output_file << std::endl;
+    return false;
+  }
+
+  for (const auto &file : input_files) {
+    if (!merger.AddFile(file)) {
+      std::cerr << "Cannot add ROOT file to merger: " << file << std::endl;
+      return false;
+    }
+  }
+
+  if (!merger.Merge()) {
+    std::cerr << "Failed to merge ROOT files into " << output_file << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 }  // namespace
 
 void ConvertRunDirectory(TString run_dir,
@@ -84,11 +124,29 @@ void ConvertRunDirectory(TString run_dir,
     gSystem->Exit(2);
   }
 
+  const TString temp_output_dir = TemporaryOutputDir(output_dir, run_prefix);
+  const TString merged_output_file = MergedOutputName(output_dir, run_prefix);
+  std::vector<TString> converted_files;
+
   std::cout << "Found " << files.size() << " input file(s)." << std::endl;
   for (const auto &file : files) {
-    ConvertFile(file, OutputName(output_dir, file), mode,
+    const TString converted_file = OutputName(temp_output_dir, file);
+    ConvertFile(file, converted_file, mode,
                 zerosuppression, overwrite, getbadbcid);
+    converted_files.push_back(converted_file);
   }
+
+  std::cout << "Merging " << converted_files.size()
+            << " ROOT file(s) into " << merged_output_file << std::endl;
+  if (!MergeRootFiles(converted_files, merged_output_file, overwrite)) {
+    gSystem->Exit(3);
+  }
+
+  for (const auto &converted_file : converted_files) {
+    gSystem->Unlink(converted_file);
+  }
+  gSystem->Exec(TString::Format("rmdir %s >/dev/null 2>&1",
+                                temp_output_dir.Data()));
 }
 
 void ConvertCommissionRun(int run_number,
